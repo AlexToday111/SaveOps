@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package saveops.account.v1;
+
+option java_multiple_files = true;
+option java_package = "com.saveops.contracts.account";
+option java_outer_classname = "AccountContracts";
+
+service AccountService {
+  rpc GetBalance(GetBalanceRequest) returns (BalanceResponse);
+  rpc CreateAccount(CreateAccountRequest) returns (AccountResponse);
+  rpc DepositMoney(MoneyOperationRequest) returns (MoneyOperationResponse);
+  rpc WithdrawMoney(MoneyOperationRequest) returns (MoneyOperationResponse);
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+}
+
+message GetBalanceRequest {
+  string account_id = 1;
+}
+
+message CreateAccountRequest {
+  string owner_id = 1;
+  string currency = 2;
+  string correlation_id = 3;
+}
+
+message MoneyOperationRequest {
+  string account_id = 1;
+  string amount = 2;
+  string operation_id = 3;
+  string correlation_id = 4;
+}
+
+message ListAccountsRequest {
+  string owner_id = 1;
+}
+
+message AccountResponse {
+  string account_id = 1;
+  string owner_id = 2;
+  string status = 3;
+  string currency = 4;
+  string balance = 5;
+}
+
+message BalanceResponse {
+  string account_id = 1;
+  string currency = 2;
+  string balance = 3;
+}
+
+message MoneyOperationResponse {
+  string account_id = 1;
+  string currency = 2;
+  string balance = 3;
+  string ledger_entry_id = 4;
+}
+
+message ListAccountsResponse {
+  repeated AccountResponse accounts = 1;
+}
+

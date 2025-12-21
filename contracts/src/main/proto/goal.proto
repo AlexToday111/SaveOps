@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package saveops.goal.v1;
+
+option java_multiple_files = true;
+option java_package = "com.saveops.contracts.goal";
+option java_outer_classname = "GoalContracts";
+
+service GoalService {
+  rpc CreateGoal(CreateGoalRequest) returns (GoalResponse);
+  rpc GetGoal(GetGoalRequest) returns (GoalResponse);
+  rpc GetGoalProgress(GetGoalProgressRequest) returns (GoalProgressResponse);
+}
+
+message CreateGoalRequest {
+  string owner_id = 1;
+  string account_id = 2;
+  string name = 3;
+  string target_amount = 4;
+  string currency = 5;
+  string correlation_id = 6;
+}
+
+message GetGoalRequest {
+  string goal_id = 1;
+}
+
+message GetGoalProgressRequest {
+  string goal_id = 1;
+}
+
+message GoalResponse {
+  string goal_id = 1;
+  string owner_id = 2;
+  string account_id = 3;
+  string name = 4;
+  string target_amount = 5;
+  string currency = 6;
+}
+
+message GoalProgressResponse {
+  string goal_id = 1;
+  string account_id = 2;
+  string current_amount = 3;
+  string target_amount = 4;
+  double progress_percent = 5;
+}
+

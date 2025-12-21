@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+target/
+*.iml
+.env
+.codex
+.DS_Store
+node_modules/
+docker/grafana/data/
+*.log
