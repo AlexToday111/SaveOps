@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+grpc:
+  client:
+    account-service:
+      address: ${ACCOUNT_GRPC_URL:static://localhost:9091}
+      negotiation-type: plaintext
+    goal-service:
+      address: ${GOAL_GRPC_URL:static://localhost:9092}
+      negotiation-type: plaintext
+
+saveops:
+  simulator-url: ${SIMULATOR_URL:http://localhost:8083}
+  audit-url: ${AUDIT_URL:http://localhost:8086}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  pattern:
+    level: "%5p [correlationId=%X{correlationId:-}]"
