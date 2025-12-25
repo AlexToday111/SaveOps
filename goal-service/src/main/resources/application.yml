@@ -1,0 +1,43 @@
+server:
+  port: 8082
+
+grpc:
+  server:
+    port: 9092
+  client:
+    account-service:
+      address: ${ACCOUNT_GRPC_URL:static://localhost:9091}
+      negotiation-type: plaintext
+
+spring:
+  application:
+    name: goal-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:saveops_goal}
+    username: ${POSTGRES_USER:saveops}
+    password: ${POSTGRES_PASSWORD:saveops}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  pattern:
+    level: "%5p [correlationId=%X{correlationId:-}]"
+
