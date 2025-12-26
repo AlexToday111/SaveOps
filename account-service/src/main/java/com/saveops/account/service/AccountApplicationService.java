@@ -76,6 +76,11 @@ public class AccountApplicationService {
     }
 
     @Transactional
+    public MoneyOperationResult roundUp(UUID accountId, BigDecimal amount, String operationId, String correlationId) {
+        return applyMoney(accountId, amount, operationId, correlationId, LedgerEntryType.ROUND_UP);
+    }
+
+    @Transactional
     public MoneyOperationResult withdraw(UUID accountId, BigDecimal amount, String operationId, String correlationId) {
         return applyMoney(accountId, amount, operationId, correlationId, LedgerEntryType.WITHDRAW);
     }
@@ -144,4 +149,3 @@ public class AccountApplicationService {
         return "account:balance:" + accountId;
     }
 }
-
