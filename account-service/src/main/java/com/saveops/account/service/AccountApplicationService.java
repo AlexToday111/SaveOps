@@ -103,7 +103,7 @@ public class AccountApplicationService {
         if (amount.signum() <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }
-        String idempotencyKey = "account:idempotency:" + operationId;
+        String idempotencyKey = RedisKeyFactory.idempotencyKey(operationId);
         Boolean created = redisTemplate.opsForValue().setIfAbsent(idempotencyKey, accountId.toString(), IDEMPOTENCY_TTL);
         if (Boolean.FALSE.equals(created)) {
             return ledgerEntryRepository.findByOperationId(operationId)
