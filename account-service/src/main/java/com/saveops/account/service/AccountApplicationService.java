@@ -146,6 +146,6 @@ public class AccountApplicationService {
     }
 
     private String balanceKey(UUID accountId) {
-        return "account:balance:" + accountId;
+        return RedisKeyFactory.balanceKey(accountId);
     }
 }
