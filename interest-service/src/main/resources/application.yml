@@ -1,0 +1,55 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: interest-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:saveops_interest}
+    username: ${POSTGRES_USER:saveops}
+    password: ${POSTGRES_PASSWORD:saveops}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:saveops}
+    password: ${RABBITMQ_PASSWORD:saveops}
+
+grpc:
+  client:
+    account-service:
+      address: ${ACCOUNT_GRPC_URL:static://localhost:9091}
+      negotiation-type: plaintext
+
+saveops:
+  interest:
+    annual-rate: ${INTEREST_ANNUAL_RATE:0.06}
+    cron: ${INTEREST_CRON:0 0 3 * * *}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  pattern:
+    level: "%5p [correlationId=%X{correlationId:-}]"
+
