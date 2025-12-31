@@ -11,14 +11,12 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
@@ -27,11 +25,10 @@ import java.util.UUID;
 @Service
 public class InterestAccrualService {
     private static final Logger log = LoggerFactory.getLogger(InterestAccrualService.class);
-    private static final String LOCK_KEY = "interest:daily-accrual-lock";
 
     private final TrackedAccountRepository trackedAccountRepository;
     private final InterestAccrualRepository accrualRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final InterestLockService lockService;
     private final AccountGrpcClient accountClient;
     private final InterestEventPublisher eventPublisher;
     private final BigDecimal annualRate;
@@ -39,14 +36,14 @@ public class InterestAccrualService {
 
     public InterestAccrualService(TrackedAccountRepository trackedAccountRepository,
                                   InterestAccrualRepository accrualRepository,
-                                  StringRedisTemplate redisTemplate,
+                                  InterestLockService lockService,
                                   AccountGrpcClient accountClient,
                                   InterestEventPublisher eventPublisher,
                                   @Value("${saveops.interest.annual-rate:0.06}") BigDecimal annualRate,
                                   MeterRegistry meterRegistry) {
         this.trackedAccountRepository = trackedAccountRepository;
         this.accrualRepository = accrualRepository;
-        this.redisTemplate = redisTemplate;
+        this.lockService = lockService;
         this.accountClient = accountClient;
         this.eventPublisher = eventPublisher;
         this.annualRate = annualRate;
@@ -55,12 +52,12 @@ public class InterestAccrualService {
 
     @Scheduled(cron = "${saveops.interest.cron:0 0 3 * * *}")
     public void scheduledAccrual() {
-        Boolean locked = redisTemplate.opsForValue().setIfAbsent(LOCK_KEY + ":" + LocalDate.now(), "locked", Duration.ofHours(6));
-        if (!Boolean.TRUE.equals(locked)) {
+        LocalDate today = LocalDate.now();
+        if (!lockService.tryAcquireDailyLock(today)) {
             log.info("Interest accrual skipped because distributed lock is held");
             return;
         }
-        accrueForAllTrackedAccounts(LocalDate.now());
+        accrueForAllTrackedAccounts(today);
     }
 
     @Transactional
@@ -91,4 +88,3 @@ public class InterestAccrualService {
         ));
     }
 }
-
