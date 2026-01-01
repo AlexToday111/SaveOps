@@ -24,6 +24,9 @@ spring:
     enabled: true
 
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
   endpoints:
     web:
       exposure:
@@ -40,4 +43,3 @@ management:
 logging:
   pattern:
     level: "%5p [correlationId=%X{correlationId:-}]"
-

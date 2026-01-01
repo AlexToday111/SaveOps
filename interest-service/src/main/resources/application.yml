@@ -36,6 +36,9 @@ saveops:
     cron: ${INTEREST_CRON:0 0 3 * * *}
 
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
   endpoints:
     web:
       exposure:
@@ -52,4 +55,3 @@ management:
 logging:
   pattern:
     level: "%5p [correlationId=%X{correlationId:-}]"
-
