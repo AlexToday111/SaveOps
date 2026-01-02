@@ -1,0 +1,57 @@
+{
+  "uid": "saveops-overview",
+  "title": "SaveOps Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "tags": ["saveops", "spring-boot"],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Created accounts",
+      "id": 1,
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "sum(saveops_accounts_created_total)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Money transfers",
+      "id": 2,
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "sum(saveops_money_transfers_total)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Interest accrued",
+      "id": 3,
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "sum(saveops_interest_accrued_total)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Notification failures",
+      "id": 4,
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "sum(saveops_notification_failures_total)", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP request rate",
+      "id": 5,
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "sum by (application, uri) (rate(http_server_requests_seconds_count[5m]))", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM memory used",
+      "id": 6,
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "sum by (application, area) (jvm_memory_used_bytes)", "refId": "A"}]
+    }
+  ]
+}
+
