@@ -31,5 +31,20 @@ class GoalApplicationServiceTest {
         assertThat(progress.currentAmount()).isEqualByComparingTo("250.00");
         assertThat(progress.progressPercent()).isEqualTo(25.0);
     }
-}
 
+    @Test
+    void progressIsCappedAtOneHundredPercent() {
+        UUID goalId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        SavingsGoalEntity goal = new SavingsGoalEntity(goalId, "user-1", accountId, "Laptop", new BigDecimal("1000.00"), "RUB", Instant.now());
+        SavingsGoalRepository repository = mock(SavingsGoalRepository.class);
+        AccountBalanceClient balanceClient = mock(AccountBalanceClient.class);
+        when(repository.findById(goalId)).thenReturn(Optional.of(goal));
+        when(balanceClient.getBalance(accountId.toString())).thenReturn(new BigDecimal("1200.00"));
+        GoalApplicationService service = new GoalApplicationService(repository, balanceClient);
+
+        GoalProgressResult progress = service.getProgress(goalId);
+
+        assertThat(progress.progressPercent()).isEqualTo(100.0);
+    }
+}
