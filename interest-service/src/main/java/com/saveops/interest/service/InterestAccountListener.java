@@ -1,6 +1,7 @@
 package com.saveops.interest.service;
 
 import com.saveops.common.event.DomainEvent;
+import com.saveops.common.logging.CorrelationScope;
 import com.saveops.interest.config.InterestRabbitConfig;
 import com.saveops.interest.entity.TrackedAccountEntity;
 import com.saveops.interest.repository.TrackedAccountRepository;
@@ -22,16 +23,17 @@ public class InterestAccountListener {
     @RabbitListener(queues = InterestRabbitConfig.ACCOUNT_OPENED_QUEUE)
     @Transactional
     public void onAccountOpened(DomainEvent event) {
-        UUID accountId = UUID.fromString(event.aggregateId());
-        if (repository.existsById(accountId)) {
-            return;
+        try (CorrelationScope ignored = CorrelationScope.open(event.correlationId())) {
+            UUID accountId = UUID.fromString(event.aggregateId());
+            if (repository.existsById(accountId)) {
+                return;
+            }
+            repository.save(new TrackedAccountEntity(
+                    accountId,
+                    String.valueOf(event.payload().get("ownerId")),
+                    String.valueOf(event.payload().get("currency")),
+                    Instant.now()
+            ));
         }
-        repository.save(new TrackedAccountEntity(
-                accountId,
-                String.valueOf(event.payload().get("ownerId")),
-                String.valueOf(event.payload().get("currency")),
-                Instant.now()
-        ));
     }
 }
-

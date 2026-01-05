@@ -3,6 +3,7 @@ package com.saveops.account.messaging;
 import com.saveops.account.service.AccountApplicationService;
 import com.saveops.common.event.DomainEvent;
 import com.saveops.common.event.EventConstants;
+import com.saveops.common.logging.CorrelationScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -22,12 +23,14 @@ public class AccountEventListener {
 
     @RabbitListener(queues = EventConstants.ACCOUNT_ROUND_UP_QUEUE)
     public void onPurchaseRoundedUp(DomainEvent event) {
-        String accountId = String.valueOf(event.payload().get("accountId"));
-        BigDecimal roundUpAmount = new BigDecimal(String.valueOf(event.payload().get("roundUpAmount")));
-        if (roundUpAmount.signum() <= 0) {
-            log.info("Skipping zero round-up event {}", event.eventId());
-            return;
+        try (CorrelationScope ignored = CorrelationScope.open(event.correlationId())) {
+            String accountId = String.valueOf(event.payload().get("accountId"));
+            BigDecimal roundUpAmount = new BigDecimal(String.valueOf(event.payload().get("roundUpAmount")));
+            if (roundUpAmount.signum() <= 0) {
+                log.info("Skipping zero round-up event {}", event.eventId());
+                return;
+            }
+            accountService.roundUp(UUID.fromString(accountId), roundUpAmount, event.eventId(), event.correlationId());
         }
-        accountService.roundUp(UUID.fromString(accountId), roundUpAmount, event.eventId(), event.correlationId());
     }
 }

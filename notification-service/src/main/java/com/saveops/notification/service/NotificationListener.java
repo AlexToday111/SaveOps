@@ -2,6 +2,7 @@ package com.saveops.notification.service;
 
 import com.saveops.common.event.DomainEvent;
 import com.saveops.common.event.EventConstants;
+import com.saveops.common.logging.CorrelationScope;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class NotificationListener {
 
     @RabbitListener(queues = EventConstants.NOTIFICATION_QUEUE)
     public void onEvent(DomainEvent event) {
-        try {
+        try (CorrelationScope ignored = CorrelationScope.open(event.correlationId())) {
             if (Boolean.TRUE.equals(event.payload().get("forceNotificationFailure"))) {
                 throw new IllegalStateException("Forced notification failure");
             }
@@ -37,4 +38,3 @@ public class NotificationListener {
         }
     }
 }
-
