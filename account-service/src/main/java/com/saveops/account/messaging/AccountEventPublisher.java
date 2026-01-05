@@ -1,13 +1,12 @@
 package com.saveops.account.messaging;
 
 import com.saveops.common.event.DomainEvent;
+import com.saveops.common.event.DomainEventFactory;
 import com.saveops.common.event.EventConstants;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class AccountEventPublisher {
@@ -30,8 +29,7 @@ public class AccountEventPublisher {
     }
 
     private void publish(String routingKey, String eventType, String aggregateId, String correlationId, Map<String, Object> payload) {
-        DomainEvent event = new DomainEvent(UUID.randomUUID().toString(), eventType, aggregateId, Instant.now(), correlationId, payload);
+        DomainEvent event = DomainEventFactory.create(eventType, aggregateId, correlationId, payload);
         rabbitTemplate.convertAndSend(EventConstants.EXCHANGE, routingKey, event);
     }
 }
-
