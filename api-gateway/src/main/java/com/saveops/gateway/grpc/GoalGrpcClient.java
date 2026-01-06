@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @Component
 public class GoalGrpcClient {
@@ -22,26 +26,41 @@ public class GoalGrpcClient {
     private GoalServiceGrpc.GoalServiceBlockingStub goalStub;
 
     public GoalResponse createGoal(String ownerId, String accountId, String name, BigDecimal targetAmount, String currency) {
-        return withDeadline().createGoal(CreateGoalRequest.newBuilder()
+        return retry(() -> withDeadline().createGoal(CreateGoalRequest.newBuilder()
                 .setOwnerId(ownerId)
                 .setAccountId(accountId)
                 .setName(name)
                 .setTargetAmount(targetAmount.toPlainString())
                 .setCurrency(currency)
                 .setCorrelationId(CorrelationId.currentOrNew())
-                .build());
+                .build()));
     }
 
     public GoalResponse getGoal(String goalId) {
-        return withDeadline().getGoal(GetGoalRequest.newBuilder().setGoalId(goalId).build());
+        return retry(() -> withDeadline().getGoal(GetGoalRequest.newBuilder().setGoalId(goalId).build()));
     }
 
     public GoalProgressResponse getProgress(String goalId) {
-        return withDeadline().getGoalProgress(GetGoalProgressRequest.newBuilder().setGoalId(goalId).build());
+        return retry(() -> withDeadline().getGoalProgress(GetGoalProgressRequest.newBuilder().setGoalId(goalId).build()));
     }
 
     private GoalServiceGrpc.GoalServiceBlockingStub withDeadline() {
         return goalStub.withDeadlineAfter(DEADLINE.toMillis(), TimeUnit.MILLISECONDS);
     }
-}
 
+    private <T> T retry(Supplier<T> call) {
+        StatusRuntimeException last = null;
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try {
+                return call.get();
+            } catch (StatusRuntimeException ex) {
+                last = ex;
+                if (ex.getStatus().getCode() != Status.Code.UNAVAILABLE
+                        && ex.getStatus().getCode() != Status.Code.DEADLINE_EXCEEDED) {
+                    throw ex;
+                }
+            }
+        }
+        throw last;
+    }
+}

@@ -15,6 +15,10 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @Component
 public class AccountGrpcClient {
@@ -24,23 +28,23 @@ public class AccountGrpcClient {
     private AccountServiceGrpc.AccountServiceBlockingStub accountStub;
 
     public AccountResponse createAccount(String ownerId, String currency) {
-        return withDeadline().createAccount(CreateAccountRequest.newBuilder()
+        return retry(() -> withDeadline().createAccount(CreateAccountRequest.newBuilder()
                 .setOwnerId(ownerId)
                 .setCurrency(currency)
                 .setCorrelationId(CorrelationId.currentOrNew())
-                .build());
+                .build()));
     }
 
     public BalanceResponse getBalance(String accountId) {
-        return withDeadline().getBalance(GetBalanceRequest.newBuilder().setAccountId(accountId).build());
+        return retry(() -> withDeadline().getBalance(GetBalanceRequest.newBuilder().setAccountId(accountId).build()));
     }
 
     public MoneyOperationResponse deposit(String accountId, BigDecimal amount, String operationId) {
-        return withDeadline().depositMoney(moneyRequest(accountId, amount, operationId));
+        return retry(() -> withDeadline().depositMoney(moneyRequest(accountId, amount, operationId)));
     }
 
     public MoneyOperationResponse withdraw(String accountId, BigDecimal amount, String operationId) {
-        return withDeadline().withdrawMoney(moneyRequest(accountId, amount, operationId));
+        return retry(() -> withDeadline().withdrawMoney(moneyRequest(accountId, amount, operationId)));
     }
 
     private MoneyOperationRequest moneyRequest(String accountId, BigDecimal amount, String operationId) {
@@ -56,5 +60,20 @@ public class AccountGrpcClient {
     private AccountServiceGrpc.AccountServiceBlockingStub withDeadline() {
         return accountStub.withDeadlineAfter(DEADLINE.toMillis(), TimeUnit.MILLISECONDS);
     }
-}
 
+    private <T> T retry(Supplier<T> call) {
+        StatusRuntimeException last = null;
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try {
+                return call.get();
+            } catch (StatusRuntimeException ex) {
+                last = ex;
+                if (ex.getStatus().getCode() != Status.Code.UNAVAILABLE
+                        && ex.getStatus().getCode() != Status.Code.DEADLINE_EXCEEDED) {
+                    throw ex;
+                }
+            }
+        }
+        throw last;
+    }
+}
