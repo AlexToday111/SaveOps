@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
 import java.util.Map;
 
@@ -29,7 +30,10 @@ public class PurchaseController {
     public Map<?, ?> simulate(@Valid @RequestBody PurchaseDtos.SimulatePurchaseRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(CorrelationId.HEADER, CorrelationId.currentOrNew());
-        return restTemplate.postForObject(simulatorUrl + "/internal/purchases/simulate", new HttpEntity<>(request, headers), Map.class);
+        try {
+            return restTemplate.postForObject(simulatorUrl + "/internal/purchases/simulate", new HttpEntity<>(request, headers), Map.class);
+        } catch (RestClientException ex) {
+            return Map.of("status", "accepted_degraded", "message", "Purchase simulation service is temporarily unavailable");
+        }
     }
 }
-

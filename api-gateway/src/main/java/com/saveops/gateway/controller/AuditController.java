@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,10 @@ public class AuditController {
     public List<?> getAudit(@PathVariable String aggregateId) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(CorrelationId.HEADER, CorrelationId.currentOrNew());
-        return restTemplate.exchange(auditUrl + "/internal/audit/" + aggregateId, HttpMethod.GET, new HttpEntity<>(headers), List.class).getBody();
+        try {
+            return restTemplate.exchange(auditUrl + "/internal/audit/" + aggregateId, HttpMethod.GET, new HttpEntity<>(headers), List.class).getBody();
+        } catch (RestClientException ex) {
+            return Collections.emptyList();
+        }
     }
 }
-
