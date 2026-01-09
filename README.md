@@ -192,5 +192,29 @@ make logs service=account-service
 
 ## Timeline разработки
 
-Коммиты выполнены в формате Conventional Commits по milestone-плану: от инициализации monorepo и Maven до сервисов, Redis, RabbitMQ, observability, тестов, resilience, документации и devex.
+Коммиты выполнены в формате Conventional Commits по milestone-плану:
 
+- 21 декабря: инициализация monorepo и Maven/Java 21.
+- 22 декабря: Docker Compose для PostgreSQL/Redis/RabbitMQ и gRPC proto contracts.
+- 23 декабря: account domain, Flyway и gRPC endpoints.
+- 24 декабря: REST api-gateway, validation и global error handling.
+- 25 декабря: goal domain и интеграция с account gRPC.
+- 26 декабря: RabbitMQ routing и account domain events.
+- 27 декабря: симулятор покупок и `purchase.rounded-up`.
+- 28 декабря: notification consumer, retry и DLQ.
+- 29 декабря: audit storage и API поиска.
+- 30 декабря: Redis idempotency keys и balance cache.
+- 31 декабря: interest accrual job и Redis distributed lock.
+- 1 января: Actuator/Prometheus и custom business metrics.
+- 2 января: Prometheus и Grafana provisioning.
+- 3-4 января: unit и Testcontainers integration tests.
+- 5-6 января: common contracts, correlation-id propagation, gRPC deadlines/retry.
+- 7-9 января: SRE docs, runbooks, README, Makefile и docker compose readiness.
+
+## Проверочный чеклист
+
+- Flyway migrations есть в `account-service`, `goal-service`, `interest-service`, `audit-service`.
+- `.proto` файлы находятся в `contracts/src/main/proto`.
+- Prometheus config: `docker/prometheus/prometheus.yml`.
+- Grafana dashboard: `docker/grafana/dashboards/saveops-overview.json`.
+- Production-like JPA режим использует `ddl-auto=validate`.
