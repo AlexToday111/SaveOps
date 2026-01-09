@@ -46,7 +46,182 @@ services:
       timeout: 5s
       retries: 5
 
+  account-service:
+    build:
+      context: .
+      dockerfile: account-service/Dockerfile
+    container_name: saveops-account-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: saveops_account
+      POSTGRES_USER: saveops
+      POSTGRES_PASSWORD: saveops
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: saveops
+      RABBITMQ_PASSWORD: saveops
+    ports:
+      - "8081:8081"
+      - "9091:9091"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  goal-service:
+    build:
+      context: .
+      dockerfile: goal-service/Dockerfile
+    container_name: saveops-goal-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: saveops_goal
+      POSTGRES_USER: saveops
+      POSTGRES_PASSWORD: saveops
+      ACCOUNT_GRPC_URL: static://account-service:9091
+    ports:
+      - "8082:8082"
+      - "9092:9092"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      account-service:
+        condition: service_started
+
+  transaction-simulator-service:
+    build:
+      context: .
+      dockerfile: transaction-simulator-service/Dockerfile
+    container_name: saveops-transaction-simulator-service
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: saveops
+      RABBITMQ_PASSWORD: saveops
+    ports:
+      - "8083:8083"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  interest-service:
+    build:
+      context: .
+      dockerfile: interest-service/Dockerfile
+    container_name: saveops-interest-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: saveops_interest
+      POSTGRES_USER: saveops
+      POSTGRES_PASSWORD: saveops
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: saveops
+      RABBITMQ_PASSWORD: saveops
+      ACCOUNT_GRPC_URL: static://account-service:9091
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      account-service:
+        condition: service_started
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: saveops-notification-service
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: saveops
+      RABBITMQ_PASSWORD: saveops
+    ports:
+      - "8085:8085"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  audit-service:
+    build:
+      context: .
+      dockerfile: audit-service/Dockerfile
+    container_name: saveops-audit-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: saveops_audit
+      POSTGRES_USER: saveops
+      POSTGRES_PASSWORD: saveops
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: saveops
+      RABBITMQ_PASSWORD: saveops
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: saveops-api-gateway
+    environment:
+      REDIS_HOST: redis
+      ACCOUNT_GRPC_URL: static://account-service:9091
+      GOAL_GRPC_URL: static://goal-service:9092
+      SIMULATOR_URL: http://transaction-simulator-service:8083
+      AUDIT_URL: http://audit-service:8086
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      account-service:
+        condition: service_started
+      goal-service:
+        condition: service_started
+      transaction-simulator-service:
+        condition: service_started
+      audit-service:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: saveops-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      api-gateway:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: saveops-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+
 volumes:
   postgres_data:
   redis_data:
-
