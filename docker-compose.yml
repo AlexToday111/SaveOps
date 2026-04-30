@@ -49,7 +49,7 @@ services:
   account-service:
     build:
       context: .
-      dockerfile: account-service/Dockerfile
+      dockerfile: services/account-service/Dockerfile
     container_name: saveops-account-service
     environment:
       POSTGRES_HOST: postgres
@@ -74,7 +74,7 @@ services:
   goal-service:
     build:
       context: .
-      dockerfile: goal-service/Dockerfile
+      dockerfile: services/goal-service/Dockerfile
     container_name: saveops-goal-service
     environment:
       POSTGRES_HOST: postgres
@@ -94,7 +94,7 @@ services:
   transaction-simulator-service:
     build:
       context: .
-      dockerfile: transaction-simulator-service/Dockerfile
+      dockerfile: services/transaction-simulator-service/Dockerfile
     container_name: saveops-transaction-simulator-service
     environment:
       RABBITMQ_HOST: rabbitmq
@@ -109,7 +109,7 @@ services:
   interest-service:
     build:
       context: .
-      dockerfile: interest-service/Dockerfile
+      dockerfile: services/interest-service/Dockerfile
     container_name: saveops-interest-service
     environment:
       POSTGRES_HOST: postgres
@@ -136,7 +136,7 @@ services:
   notification-service:
     build:
       context: .
-      dockerfile: notification-service/Dockerfile
+      dockerfile: services/notification-service/Dockerfile
     container_name: saveops-notification-service
     environment:
       RABBITMQ_HOST: rabbitmq
@@ -151,7 +151,7 @@ services:
   audit-service:
     build:
       context: .
-      dockerfile: audit-service/Dockerfile
+      dockerfile: services/audit-service/Dockerfile
     container_name: saveops-audit-service
     environment:
       POSTGRES_HOST: postgres
@@ -172,7 +172,7 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: api-gateway/Dockerfile
+      dockerfile: services/api-gateway/Dockerfile
     container_name: saveops-api-gateway
     environment:
       REDIS_HOST: redis

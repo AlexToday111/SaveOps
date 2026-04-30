@@ -1,6 +1,5 @@
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-ARG JAR_FILE=audit-service/target/*.jar
+ARG JAR_FILE=services/api-gateway/target/*.jar
 COPY ${JAR_FILE} app.jar
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
-

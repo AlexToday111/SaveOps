@@ -63,6 +63,27 @@ flowchart LR
 - `contracts` — `.proto` контракты и генерация Java gRPC-кода.
 - `common` — общий envelope событий, correlation-id, error DTO.
 
+## Структура репозитория
+
+```text
+saveops/
+├── services/
+│   ├── api-gateway/
+│   ├── account-service/
+│   ├── goal-service/
+│   ├── transaction-simulator-service/
+│   ├── interest-service/
+│   ├── notification-service/
+│   └── audit-service/
+├── contracts/
+├── common/
+├── docker/
+├── docs/
+├── docker-compose.yml
+├── Makefile
+└── README.md
+```
+
 ## Как запустить
 
 ```bash
@@ -213,7 +234,7 @@ make logs service=account-service
 
 ## Проверочный чеклист
 
-- Flyway migrations есть в `account-service`, `goal-service`, `interest-service`, `audit-service`.
+- Flyway migrations есть в `services/account-service`, `services/goal-service`, `services/interest-service`, `services/audit-service`.
 - `.proto` файлы находятся в `contracts/src/main/proto`.
 - Prometheus config: `docker/prometheus/prometheus.yml`.
 - Grafana dashboard: `docker/grafana/dashboards/saveops-overview.json`.

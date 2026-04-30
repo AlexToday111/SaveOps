@@ -15,13 +15,13 @@
     <modules>
         <module>contracts</module>
         <module>common</module>
-        <module>account-service</module>
-        <module>goal-service</module>
-        <module>transaction-simulator-service</module>
-        <module>interest-service</module>
-        <module>notification-service</module>
-        <module>audit-service</module>
-        <module>api-gateway</module>
+        <module>services/account-service</module>
+        <module>services/goal-service</module>
+        <module>services/transaction-simulator-service</module>
+        <module>services/interest-service</module>
+        <module>services/notification-service</module>
+        <module>services/audit-service</module>
+        <module>services/api-gateway</module>
     </modules>
 
     <properties>
@@ -93,4 +93,3 @@
         </pluginManagement>
     </build>
 </project>
-
