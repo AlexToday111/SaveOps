@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/saveops-logo.png" alt="SaveOps logo" width="760">
+</p>
+
 # SaveOps
 
 SaveOps — микросервисная платформа для управления накопительными счетами, целями накопления, округлением покупок, начислением процентов, аудитом и mock-уведомлениями.
