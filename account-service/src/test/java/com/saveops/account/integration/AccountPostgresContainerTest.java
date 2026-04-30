@@ -20,7 +20,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class AccountPostgresContainerTest {
     @Container
@@ -53,4 +53,3 @@ class AccountPostgresContainerTest {
                 .isEqualTo(new BigDecimal("100.00"));
     }
 }
-

@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class RabbitRedisContainerTest {
     @Container
     static final RabbitMQContainer rabbit = new RabbitMQContainer("rabbitmq:3.13-management-alpine");
@@ -58,4 +58,3 @@ class RabbitRedisContainerTest {
         }
     }
 }
-
